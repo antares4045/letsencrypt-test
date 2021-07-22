@@ -1,0 +1,31 @@
+version: '3'
+
+networks:
+  default:
+    external:
+      name: letsencrypt-network
+
+services:
+  frontend:
+    container_name: letsencrypt-test-front
+    build: 
+        context: ./frontend
+    command: serve -s build -l 3000
+    stdin_open: true
+    tty: true
+    environment:
+        - PORT=3000
+        - HOST_API=
+        - PORT_API=
+  nginx:
+    container_name: letsencrypt-test-nginx
+    image: nginx:stable-alpine
+    ports:
+        - "4543:443"
+        - "4580:80"
+    volumes:
+        - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
+    environment:
+      - VIRTUAL_HOST=ec2-18-119-114-45.us-east-2.compute.amazonaws.com
+      - LETSENCRYPT_HOST=ec2-18-119-114-45.us-east-2.compute.amazonaws.com
+      - LETSENCRYPT_EMAIL=antares4045@yandex.ru
