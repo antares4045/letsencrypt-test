@@ -1,0 +1,47 @@
+  
+version:  '3'
+
+services:
+    nginx-proxy:
+        container_name: nginx-proxy
+        image: jwilder/nginx-proxy
+        restart: unless-stopped
+        ports:
+            - 80:80
+            - 443:443
+        volumes:
+            - certs:/etc/nginx/certs
+            - vhost.d:/etc/nginx/vhost.d
+            - html:/usr/share/nginx/html
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+
+    nginx-proxy-letsencrypt:
+        container_name: nginx-proxy-letsencrypt
+        image: jrcs/letsencrypt-nginx-proxy-companion
+        restart: unless-stopped
+        volumes: 
+            - certs:/etc/nginx/certs
+            - vhost.d:/etc/nginx/vhost.d
+            - html:/usr/share/nginx/html
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+            - NGINX_PROXY_CONTAINER=nginx-proxy
+            - DEFAULT_EMAIL=<почта>
+
+    nginx:
+        image: nginx:stable-alpine
+        container_name: mobile-agent-nginx
+        restart: unless-stopped
+        environment:
+            - VIRTUAL_HOST=<dns>
+            - LETSENCRYPT_HOST=<dns>
+        volumes:
+            - ./nginx/nginx.conf.prd:/etc/nginx/conf.d/nginx.conf
+   
+    <И всё, что захочется ещё>
+    
+    
+volumes:
+    certs:
+    vhost.d:
+    html:
